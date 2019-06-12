@@ -1,0 +1,20 @@
+[Unit]
+Description=PowerManager Server
+
+[Service]
+ExecStart=/usr/bin/node /home/pi/powerManager/Server.js
+# Required on some systems
+WorkingDirectory=/home/pi/powerManager
+Restart=always
+# Restart service after 10 seconds if node service crashes
+RestartSec=10
+# Output to syslog
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=powerManager
+User=pi
+Group=pi
+Environment=NODE_ENV=production PORT=7070 ADDRESS=<LOCAL_IP> LMS_ADDRESS=<LMS_IP> LMS_PORT=9090 PLAYER_ID=<PLAYER_MAC> KODI_PORT=8080
+
+[Install]
+WantedBy=multi-user.target
