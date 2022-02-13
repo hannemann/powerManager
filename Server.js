@@ -53,11 +53,11 @@ Server.prototype.startMusic = function () {
   console.log("Start Music");
   console.log("activating speaker socket");
   this.gembird.switch(this.plugSpeaker, true);
-  console.log("deactivating monitor socket");
-  this.gembird.switch(this.plugMonitor, false);
   console.log("stopping active kodi players");
   this.kodi.stopActivePlayers();
-  this.kodi.activateScreenSaver();
+  setTimeout(() => {
+    this.kodi.activateScreenSaver();
+  }, 10000);
 };
 
 Server.prototype.stopMusic = function () {
