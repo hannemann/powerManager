@@ -45,18 +45,11 @@ class KodiWS {
     this.connection.on("error", this.handleError);
     this.connection.on("close", this.handleClosed);
     console.log("Websocket connected");
-
-    try {
-      const players = await this.activePlayers;
-      console.log(players);
-    } catch (error) {
-      console.log(error);
-    }
   }
 
   messageHandler(message) {
     if (message.type === "utf8") {
-      console.log("Received: '" + message.utf8Data + "'");
+      // console.log("Received: '" + message.utf8Data + "'");
       const result = JSON.parse(message.utf8Data);
       if (result.method && result.method.match(/[A-Z]+\.On/)) {
         const callback = result.method
@@ -138,6 +131,17 @@ class KodiWS {
       jsonrpc: "2.0",
       id: this.requestId,
       method: "Player.GetActivePlayers",
+    });
+  }
+
+  get screensaverActive() {
+    return this.send({
+      jsonrpc: "2.0",
+      id: this.requestId,
+      method: "XBMC.GetInfoBooleans",
+      params: {
+        booleans: ["System.ScreenSaverActive"],
+      },
     });
   }
 }

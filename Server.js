@@ -1,7 +1,7 @@
 import http from "http";
 import { Gembird } from "./Gembird.js";
 import { Squeeze } from "./Squeeze.js";
-import { Kodi } from "./Kodi.js";
+import { KodiCli } from "./KodiCli.js";
 import { KodiWS } from "./KodiWs.js";
 
 class Server {
@@ -9,7 +9,7 @@ class Server {
     this.gembird = new Gembird();
     this.squeeze = new Squeeze();
     this.kodiWs = new KodiWS();
-    this.kodi = new Kodi();
+    this.kodiCli = new KodiCli();
     this.plugSpeaker = 3;
     this.plugMonitor = 4;
   }
@@ -22,7 +22,7 @@ class Server {
     this.server.listen(parseInt(process.env.PORT, 10), process.env.ADDRESS);
     this.server.on("request", this.handleRequest.bind(this));
     this.squeeze.init();
-    this.kodi.init();
+    this.kodiCli.init();
     this.kodiWs.init();
 
     this.kodiWs.on("screensaveractivated", this.stopWatching.bind(this));
@@ -61,25 +61,29 @@ class Server {
       players.forEach(async (player) => {
         const result = await this.kodiWs.stopPlayer(player.playerid);
       });
-      this.kodi.activateScreenSaver();
+      const result = await this.kodiWs.screensaverActive;
+      result["System.ScreenSaverActive"] || this.kodiCli.activateScreenSaver();
     } catch (error) {
       console.log(error);
     }
   }
 
-  stopMusic() {
+  async stopMusic() {
     console.log("Stop Music");
-    this.kodi.isActive(
-      function (active) {
-        console.log(
-          "Kodi screensaver  is " + (active ? "not active" : "active")
-        );
-        if (!active) {
-          console.log("deactivating speaker socket");
-          this.gembird.switch(this.plugSpeaker, false);
-        }
-      }.bind(this)
-    );
+    try {
+      const result = await this.kodiWs.screensaverActive;
+      console.log(
+        `Kodi screensaver is ${
+          result["System.ScreenSaverActive"] ? "active" : "not active"
+        }`
+      );
+      if (result["System.ScreenSaverActive"]) {
+        console.log("deactivating speaker socket");
+        this.gembird.switch(this.plugSpeaker, false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   startWatching() {
