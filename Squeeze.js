@@ -1,21 +1,20 @@
-var net = require('net');
+import "net";
 
 var Squeeze = function () {};
 
 Squeeze.prototype.init = function () {
-  this.server = {
-    "host" : process.env.LMS_ADDRESS,
-    "port" : process.env.LMS_PORT
-  },
-  this.hmac = process.env.PLAYER_ID; // @see LMS -> Settings -> Player -> MAC Address
+  (this.server = {
+    host: process.env.LMS_ADDRESS,
+    port: process.env.LMS_PORT,
+  }),
+    (this.hmac = process.env.PLAYER_ID); // @see LMS -> Settings -> Player -> MAC Address
   this.dataHandler = this.handleData.bind(this);
   this.errorHandler = this.handleError.bind(this);
   this.callback = null;
-  console.log('Squeeze module initialized');
+  console.log("Squeeze module initialized");
 };
 
 Squeeze.prototype.getClient = function () {
-
   if ("undefined" !== typeof this.client) {
     this.removeObserver();
   }
@@ -24,37 +23,34 @@ Squeeze.prototype.getClient = function () {
 };
 
 Squeeze.prototype.addObserver = function () {
-
-  this.client.on('data', this.dataHandler);
-  this.client.on('error', this.errorHandler);
+  this.client.on("data", this.dataHandler);
+  this.client.on("error", this.errorHandler);
 };
 
 Squeeze.prototype.removeObserver = function () {
-
-  this.client.removeListener('data', this.dataHandler);
-  this.client.removeListener('error', this.errorHandler);
+  this.client.removeListener("data", this.dataHandler);
+  this.client.removeListener("error", this.errorHandler);
 };
 
 Squeeze.prototype.handleData = function (data) {
-
   var mode, state;
-  data = data.toString('utf8');
-  console.log('Squeeze: received data: ' + data);
+  data = data.toString("utf8");
+  console.log("Squeeze: received data: " + data);
 
-  if (data.indexOf('mode') > -1) {
-    mode = data.split(' ')[2].replace(/[^a-z]/, '');
+  if (data.indexOf("mode") > -1) {
+    mode = data.split(" ")[2].replace(/[^a-z]/, "");
     console.log('"' + mode + '"');
     switch (mode) {
-      case 'stop':
-      case 'pause':
+      case "stop":
+      case "pause":
         state = false;
         break;
-      case 'play':
+      case "play":
         state = true;
         break;
 
       default:
-      break;
+        break;
     }
 
     if ("function" === typeof this.callback) {
@@ -66,31 +62,37 @@ Squeeze.prototype.handleData = function (data) {
   this.client.destroy();
 };
 
-Squeeze.prototype.handleError = function(err) {
-  console.log('error:', err.message);
+Squeeze.prototype.handleError = function (err) {
+  console.log("error:", err.message);
 
   this.client.destroy();
 };
 
 Squeeze.prototype.isPlaying = function (callback) {
-
   this.getClient();
 
   if ("function" === typeof callback) {
     this.callback = callback;
   }
-  this.client.connect(this.server.port, this.server.host, function () {
-    this.client.write(this.hmac + " mode ?\nexit\n")
-  }.bind(this));
+  this.client.connect(
+    this.server.port,
+    this.server.host,
+    function () {
+      this.client.write(this.hmac + " mode ?\nexit\n");
+    }.bind(this)
+  );
 };
 
 Squeeze.prototype.stop = function (callback) {
-
   this.getClient();
 
-  this.client.connect(this.server.port, this.server.host, function () {
-    this.client.write(this.hmac + " stop\nexit\n")
-  }.bind(this));
+  this.client.connect(
+    this.server.port,
+    this.server.host,
+    function () {
+      this.client.write(this.hmac + " stop\nexit\n");
+    }.bind(this)
+  );
 };
 
-module.exports.Squeeze = Squeeze;
+export { Squeeze };

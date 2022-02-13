@@ -1,11 +1,16 @@
-var http = require("http"),
-  Gembird = require("./Gembird.js"),
-  Squeeze = require("./Squeeze.js"),
-  Kodi = require("./Kodi.js"),
-  Syslogger = require("ain2"),
-  server;
+import http from "http";
+import { Gembird } from "./Gembird.js";
+import { Squeeze } from "./Squeeze.js";
+import { Kodi } from "./Kodi.js";
+import KodiWSClient from "./KodiWs.js";
+import ain2 from "ain2";
 
-Server = function () {};
+KodiWSClient.connect(
+  `ws://${process.env.ADDRESS}:${process.env.KODI_TCP_PORT}/jsonrpc`,
+  ""
+);
+
+const Server = function () {};
 
 Server.prototype.init = function () {
   console.log("===== Initializing Powermanager =====");
@@ -14,10 +19,10 @@ Server.prototype.init = function () {
   this.server = http.createServer();
   this.server.listen(parseInt(process.env.PORT, 10), process.env.ADDRESS);
   this.server.on("request", this.handleRequest.bind(this));
-  this.gembird = new Gembird.Gembird();
-  this.squeeze = new Squeeze.Squeeze();
+  this.gembird = new Gembird();
+  this.squeeze = new Squeeze();
   this.squeeze.init();
-  this.kodi = new Kodi.Kodi();
+  this.kodi = new Kodi();
   this.kodi.init();
   this.plugSpeaker = 3;
   this.plugMonitor = 4;
@@ -119,5 +124,4 @@ Server.prototype.stopWatching = function () {
   });
 };
 
-server = new Server();
-server.init();
+new Server().init();

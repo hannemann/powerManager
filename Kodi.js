@@ -1,4 +1,4 @@
-var http = require("http");
+import http from "http";
 
 var Kodi = function () {
   this.requestId = 1;
@@ -194,4 +194,4 @@ Kodi.prototype.activateScreenSaver = function (callback) {
   this.request.end();
 };
 
-module.exports.Kodi = Kodi;
+export { Kodi };

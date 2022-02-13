@@ -1,47 +1,39 @@
-var exec = require('child_process').exec;
+import exec from "child_process";
 
 var Gembird = function () {};
 
-Gembird.prototype.command = 'sispmctl';
+Gembird.prototype.command = "sispmctl";
 
-Gembird.prototype.argOn = '-o';
+Gembird.prototype.argOn = "-o";
 
-Gembird.prototype.argOff = '-f';
+Gembird.prototype.argOff = "-f";
 
-Gembird.prototype.argStatus = '-g';
+Gembird.prototype.argStatus = "-g";
 
 Gembird.prototype.switch = function (socket, status) {
-
-  var command = [
-    this.command,
-    status ? this.argOn : this.argOff,
-    socket
-  ];
+  var command = [this.command, status ? this.argOn : this.argOff, socket];
 
   this.getStatus(socket);
 
-  setTimeout(function () {
-    exec(command.join(' '), this.handleResponse.bind(this));
-  }.bind(this), 1000);
+  setTimeout(
+    function () {
+      exec(command.join(" "), this.handleResponse.bind(this));
+    }.bind(this),
+    1000
+  );
 };
 
 Gembird.prototype.getStatus = function (socket) {
+  var command = [this.command, this.argStatus, socket];
 
-  var command = [
-    this.command,
-    this.argStatus,
-    socket
-  ];
-
-  exec(command.join(' '), this.handleResponse.bind(this));
+  exec(command.join(" "), this.handleResponse.bind(this));
 };
 
 Gembird.prototype.handleResponse = function (error, stdout, stderr) {
-
   if (error) {
     console.log(stderr);
   }
   console.log(stdout);
 };
 
-module.exports.Gembird = Gembird;
+export { Gembird };
