@@ -5,6 +5,7 @@ class KodiWS {
     this.connectInterval = undefined;
     this.client = new WebSocket.client();
     this.callbacks = {};
+    this._requestId = 0;
   }
 
   init() {
@@ -37,13 +38,20 @@ class KodiWS {
     }, 1000);
   }
 
-  connectionHandler(connection) {
+  async connectionHandler(connection) {
     clearInterval(this.connectInterval);
     this.connection = connection;
     this.connection.on("message", this.handleMessage);
     this.connection.on("error", this.handleError);
     this.connection.on("close", this.handleClosed);
     console.log("Websocket connected");
+
+    try {
+      const players = await this.activePlayers;
+      console.log(players);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   messageHandler(message) {
@@ -59,6 +67,15 @@ class KodiWS {
         if (typeof this.callbacks[callback] === "function") {
           this.callbacks[callback](result);
         }
+      }
+      if (result.id && typeof this.callbacks[result.id] === "function") {
+        if (result.result) {
+          this.callbacks[result.id](result.result, null);
+        }
+        if (result.error) {
+          this.callbacks[result.id](null, result.error);
+        }
+        delete this.callbacks[result.id];
       }
     }
   }
@@ -85,8 +102,32 @@ class KodiWS {
     }
   }
 
+  send(payload) {
+    return new Promise((resolve, reject) => {
+      if (!this.connected) reject("Not connected");
+      this.callbacks[payload.id] = (result, error) => {
+        result && resolve(result);
+        error && reject(error);
+      };
+      this.connection.sendUTF(JSON.stringify(payload));
+    });
+  }
+
   get connected() {
     return typeof this.connection !== "undefined" && this.connection.connected;
+  }
+
+  get requestId() {
+    this._requestId++;
+    return this._requestId;
+  }
+
+  get activePlayers() {
+    return this.send({
+      jsonrpc: "2.0",
+      id: this.requestId,
+      method: "Player.GetActivePlayers",
+    });
   }
 }
 export { KodiWS };
