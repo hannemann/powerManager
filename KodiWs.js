@@ -113,6 +113,17 @@ class KodiWS {
     });
   }
 
+  stopPlayer(id) {
+    return this.send({
+      jsonrpc: "2.0",
+      id: this.requestId,
+      method: "Player.Stop",
+      params: {
+        playerid: id,
+      },
+    });
+  }
+
   get connected() {
     return typeof this.connection !== "undefined" && this.connection.connected;
   }
