@@ -1,4 +1,4 @@
-import "net";
+import net from "net";
 
 var Squeeze = function () {};
 

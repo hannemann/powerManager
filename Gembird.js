@@ -1,4 +1,4 @@
-import exec from "child_process";
+import child_process from "child_process";
 
 var Gembird = function () {};
 
@@ -17,7 +17,7 @@ Gembird.prototype.switch = function (socket, status) {
 
   setTimeout(
     function () {
-      exec(command.join(" "), this.handleResponse.bind(this));
+      child_process.exec(command.join(" "), this.handleResponse.bind(this));
     }.bind(this),
     1000
   );
@@ -26,7 +26,7 @@ Gembird.prototype.switch = function (socket, status) {
 Gembird.prototype.getStatus = function (socket) {
   var command = [this.command, this.argStatus, socket];
 
-  exec(command.join(" "), this.handleResponse.bind(this));
+  child_process.exec(command.join(" "), this.handleResponse.bind(this));
 };
 
 Gembird.prototype.handleResponse = function (error, stdout, stderr) {

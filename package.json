@@ -5,7 +5,6 @@
   "main": "Server.js",
   "type": "module",
   "dependencies": {
-    "ain2": "^3.0.0",
     "websocket": "^1.0.34"
   },
   "devDependencies": {},

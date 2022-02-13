@@ -2,13 +2,7 @@ import http from "http";
 import { Gembird } from "./Gembird.js";
 import { Squeeze } from "./Squeeze.js";
 import { Kodi } from "./Kodi.js";
-import KodiWSClient from "./KodiWs.js";
-import ain2 from "ain2";
-
-KodiWSClient.connect(
-  `ws://${process.env.ADDRESS}:${process.env.KODI_TCP_PORT}/jsonrpc`,
-  ""
-);
+import { KodiWS } from "./KodiWs.js";
 
 const Server = function () {};
 
@@ -21,41 +15,18 @@ Server.prototype.init = function () {
   this.server.on("request", this.handleRequest.bind(this));
   this.gembird = new Gembird();
   this.squeeze = new Squeeze();
+  this.kodiWs = new KodiWS();
   this.squeeze.init();
   this.kodi = new Kodi();
   this.kodi.init();
+  this.kodiWs.init();
   this.plugSpeaker = 3;
   this.plugMonitor = 4;
-  this.pollKodiScreensaver();
-  console.log("Powermanager initialized");
-};
 
-Server.prototype.pollKodiScreensaver = function () {
-  setInterval(
-    function () {
-      this.kodi.isActive(
-        function (active) {
-          if ("undefined" === typeof this.kodiActive) {
-            this.kodiActive = active;
-          } else {
-            console.log(
-              "Kodi screensaver  is " + (active ? "not active" : "active")
-            );
-            if (active !== this.kodiActive) {
-              console.log("Kodi screensaver state changed");
-              this.kodiActive = active;
-              if (active) {
-                this.startWatching();
-              } else {
-                this.stopWatching();
-              }
-            }
-          }
-        }.bind(this)
-      );
-    }.bind(this),
-    5000
-  );
+  this.kodiWs.on("screensaveractivated", this.stopWatching.bind(this));
+  this.kodiWs.on("screensaverdeactivated", this.startWatching.bind(this));
+
+  console.log("Powermanager initialized");
 };
 
 Server.prototype.handleRequest = function (request, response) {
