@@ -1,10 +1,13 @@
 import http from "http";
+import child_process from "child_process";
 
 var Kodi = function () {
   this.requestId = 1;
   this.callbacks = {};
   this.requests = {};
 };
+
+Kodi.prototype.cliSend = "kodi-send";
 
 Kodi.prototype.isActiveData = {
   jsonrpc: "2.0",
@@ -180,18 +183,8 @@ Kodi.prototype.stopActivePlayers = function (callback) {
  * @param {Function} callback
  */
 Kodi.prototype.activateScreenSaver = function (callback) {
-  this.getClient();
-
-  const requestData = this.activateScreensaverData;
-  requestData.id = this.requestId;
-  if ("function" === typeof callback) {
-    this.callbacks[this.requestId] = callback;
-  }
-  this.requests[this.requestId] = "activateScreenSaver";
-  this.requestId++;
-
-  this.request.write(JSON.stringify(requestData));
-  this.request.end();
+  const command = [this.cliSend, '--action="ActivateScreensaver"'];
+  child_process.exec(command.join(" "));
 };
 
 export { Kodi };

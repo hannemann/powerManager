@@ -57,6 +57,7 @@ Server.prototype.startMusic = function () {
   this.gembird.switch(this.plugMonitor, false);
   console.log("stopping active kodi players");
   this.kodi.stopActivePlayers();
+  this.kodi.activateScreenSaver();
 };
 
 Server.prototype.stopMusic = function () {
